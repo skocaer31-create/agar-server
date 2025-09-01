@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>AgarX Clone</title>
+  <style>
+    body { margin:0; overflow:hidden; background:#111; color:white; font-family:Arial; }
+    canvas { background:#222; display:block; margin:0 auto; }
+    #escMenu {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(50,0,80,0.9); padding: 20px;
+      border-radius: 12px; display: none;
+      text-align: center; color:white;
+    }
+    #escMenu button {
+      display:block; margin:10px auto; padding:10px 20px;
+      border:none; border-radius:8px; background:#6600cc; color:white;
+      cursor:pointer;
+    }
+    #leaderboard {
+      position:absolute; top:10px; right:10px;
+      background:rgba(0,0,0,0.5); padding:10px; border-radius:10px;
+    }
+    #chat {
+      position:absolute; bottom:10px; left:10px;
+      width:300px; height:150px; background:rgba(0,0,0,0.5);
+      overflow-y:auto; border-radius:10px; padding:5px;
+    }
+    #chat input { width:100%; padding:5px; }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<div id="escMenu">
+  <h2>Menü</h2>
+  <button onclick="resumeGame()">Devam</button>
+  <button onclick="respawn()">Yeniden Doğ</button>
+  <button onclick="centerCamera()">Merkezle</button>
+  <button onclick="quitGame()">Çıkış</button>
+</div>
+
+<div id="leaderboard"><h3>Lider Tablosu</h3><ul id="leaders"></ul></div>
+
+<div id="chat">
+  <div id="chatLog"></div>
+  <input type="text" id="chatInput" placeholder="Mesaj yaz..."/>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+let cells = [];
+let food = [];
+let viruses = [];
+let player = {x:400,y:300,r:30,color:"cyan",id:1000,score:0};
+let keys = {};
+let escOpen = false;
+
+// Yem oluştur
+for (let i=0;i<200;i++){
+  food.push({x:Math.random()*2000-1000,y:Math.random()*2000-1000,r:5,color:"lime"});
+}
+// Virüsler
+for (let i=0;i<10;i++){
+  viruses.push({x:Math.random()*2000-1000,y:Math.random()*2000-1000,r:40,color:"green"});
+}
+
+function gameLoop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // Grid
+  ctx.strokeStyle="rgba(255,0,0,0.5)";
+  ctx.strokeRect(0,0,canvas.width,canvas.height);
+
+  // Food
+  for (let f of food){
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+    ctx.fillStyle=f.color;
+    ctx.fill();
+  }
+  // Virüsler
+  for (let v of viruses){
+    ctx.beginPath();
+    ctx.arc(v.x,v.y,v.r,0,Math.PI*2);
+    ctx.fillStyle=v.color;
+    ctx.fill();
+  }
+  // Player
+  ctx.beginPath();
+  ctx.arc(player.x,player.y,player.r,0,Math.PI*2);
+  ctx.fillStyle=player.color;
+  ctx.fill();
+  ctx.fillStyle="white";
+  ctx.textAlign="center";
+  ctx.fillText("ID:"+player.id,player.x,player.y);
+  
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+// ESC menu toggle
+window.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){
+    escOpen=!escOpen;
+    document.getElementById("escMenu").style.display=escOpen?"block":"none";
+  }
+});
+
+function resumeGame(){escOpen=false;document.getElementById("escMenu").style.display="none";}
+function respawn(){player.r=30;player.score=0;}
+function centerCamera(){/* camera reset stub */}
+function quitGame(){alert("Oyundan çıkış yaptın!");}
+
+// Chat
+document.getElementById("chatInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    let msg=e.target.value;
+    if(msg.trim()!==""){
+      let log=document.getElementById("chatLog");
+      log.innerHTML+="<div>"+msg+"</div>";
+      e.target.value="";
+      log.scrollTop=log.scrollHeight;
+    }
+  }
+});
+</script>
+</body>
+</html>
